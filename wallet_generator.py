@@ -36,20 +36,20 @@ def decrypt_data(encrypted_data, password):
     decrypted = unpad(cipher.decrypt(encrypted_data[16:]), AES.block_size)
     return decrypted.decode()
 
-def save_to_file(data, encrypt=False):
+def save_to_file(wallets, encrypt=False):
     filename = "wallets.json"
+    existing_data = []
+    
     if os.path.exists(filename):
         with open(filename, "r") as f:
             try:
                 existing_data = json.load(f)
             except json.JSONDecodeError:
-                existing_data = []
-    else:
-        existing_data = []
+                pass
     
-    wallets = json.loads(data)
-    for i, wallet in enumerate(wallets, start=len(existing_data) + 1):
-        wallet["number"] = i  # Add numbering
+    start_number = len(existing_data) + 1
+    for i, wallet in enumerate(wallets, start=start_number):
+        wallet["number"] = i  # Assign wallet numbers
     
     existing_data.extend(wallets)
     data = json.dumps(existing_data, indent=4)
@@ -98,7 +98,7 @@ def main():
         console.print("[blue]1.[/blue] Generate Wallet(s)")
         console.print("[blue]2.[/blue] View Saved Wallets")
         console.print("[blue]3.[/blue] Exit")
-        choice = input("\nChoose an option: ")
+        choice = input("\nChoose an option: ").strip()
         
         if choice == "1":
             num_wallets = int(input("How many wallets do you want to generate? "))
@@ -109,9 +109,8 @@ def main():
                 mnemonic, address, private_key = generate_wallet()
                 wallets.append({"mnemonic": mnemonic, "address": address, "private_key": private_key})
             
-            wallets_json = json.dumps(wallets, indent=4)
             choice = input("Do you want to encrypt the file? (y/n): ").strip().lower()
-            save_to_file(wallets_json, encrypt=(choice == "y"))
+            save_to_file(wallets, encrypt=(choice == "y"))
             
             for wallet in wallets:
                 generate_qr_code(wallet["address"], wallet["number"])
