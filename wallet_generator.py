@@ -7,6 +7,9 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 import base64
 
+# Enable HD wallet features to use mnemonics
+Account.enable_unaudited_hdwallet_features()  # <-- FIXED HERE
+
 def generate_wallet():
     mnemo = Mnemonic("english")
     mnemonic = mnemo.generate(strength=256)
@@ -38,8 +41,7 @@ def save_to_file(data, encrypt=False):
 
     print(f"Saved to {filename}")
 
-# FIXED HERE: Correcting the name variable syntax
-if __name__ == "__main__":  # <-- FIXED
+if __name__ == "__main__":
     num_wallets = int(input("How many wallets do you want to generate? "))
     wallets = []
     
