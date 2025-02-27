@@ -38,7 +38,7 @@ def save_to_file(data, encrypt=False):
 
     print(f"Saved to {filename}")
 
-if name == "main":
+if name == "main":  # <-- FIXED HERE
     num_wallets = int(input("How many wallets do you want to generate? "))
     wallets = []
     
