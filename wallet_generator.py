@@ -62,9 +62,9 @@ def save_to_file(data, encrypt=False):
         f.write(data)
     console.print(f"\n[green]✅ Wallets saved to {filename}[/green]")
 
-def generate_qr_code(address):
+def generate_qr_code(address, number):
     qr = qrcode.make(address)
-    qr_filename = f"qrcode_{address[-6:]}.png"
+    qr_filename = f"{number}.png"
     qr.save(qr_filename)
     console.print(f"[cyan]📷 QR Code saved as {qr_filename}[/cyan]")
 
@@ -108,11 +108,13 @@ def main():
                 sleep(0.5)  # Simulate loading
                 mnemonic, address, private_key = generate_wallet()
                 wallets.append({"mnemonic": mnemonic, "address": address, "private_key": private_key})
-                generate_qr_code(address)
             
             wallets_json = json.dumps(wallets, indent=4)
             choice = input("Do you want to encrypt the file? (y/n): ").strip().lower()
             save_to_file(wallets_json, encrypt=(choice == "y"))
+            
+            for wallet in wallets:
+                generate_qr_code(wallet["address"], wallet["number"])
         
         elif choice == "2":
             display_wallets()
