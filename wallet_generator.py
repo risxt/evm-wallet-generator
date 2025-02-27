@@ -36,23 +36,36 @@ def decrypt_data(encrypted_data, password):
     decrypted = unpad(cipher.decrypt(encrypted_data[16:]), AES.block_size)
     return decrypted.decode()
 
-def save_to_file(wallets, encrypt=False):
-    filename = "wallets.json"
-    existing_data = []
+def save_to_file(wallets, file_format, save_mode, encrypt=False):
+    file_extension = "json" if file_format == "1" else "txt"
+    filename = f"wallets.{file_extension}"
     
-    if os.path.exists(filename):
+    if save_mode == "3":
+        counter = 1
+        while os.path.exists(filename):
+            filename = f"wallets_{counter}.{file_extension}"
+            counter += 1
+    
+    existing_data = []
+    if os.path.exists(filename) and save_mode == "2":
         with open(filename, "r") as f:
             try:
-                existing_data = json.load(f)
+                existing_data = json.load(f) if file_extension == "json" else f.readlines()
             except json.JSONDecodeError:
                 pass
     
-    start_number = len(existing_data) + 1
+    start_number = len(existing_data) + 1 if save_mode == "2" else 1
     for i, wallet in enumerate(wallets, start=start_number):
         wallet["number"] = i  # Assign wallet numbers
     
-    existing_data.extend(wallets)
-    data = json.dumps(existing_data, indent=4)
+    if file_extension == "json":
+        existing_data.extend(wallets)
+        data = json.dumps(existing_data, indent=4)
+    else:
+        lines = [f"Wallet {w['number']}:\nAddress: {w['address']}\nMnemonic: {w['mnemonic']}\nPrivate Key: {w['private_key']}\n\n" for w in wallets]
+        data = "".join(lines)
+        if save_mode == "2":
+            data = "".join(existing_data) + data
     
     if encrypt:
         password = getpass.getpass("Enter encryption password: ")
@@ -109,8 +122,13 @@ def main():
                 mnemonic, address, private_key = generate_wallet()
                 wallets.append({"mnemonic": mnemonic, "address": address, "private_key": private_key})
             
+            console.print("[yellow]Choose file format:[/yellow] 1. JSON 2. TXT")
+            file_format = input("Enter choice (1/2): ").strip()
+            console.print("[yellow]Choose save mode:[/yellow] 1. Overwrite 2. Append 3. New File")
+            save_mode = input("Enter choice (1/2/3): ").strip()
+            
             choice = input("Do you want to encrypt the file? (y/n): ").strip().lower()
-            save_to_file(wallets, encrypt=(choice == "y"))
+            save_to_file(wallets, file_format, save_mode, encrypt=(choice == "y"))
             
             for wallet in wallets:
                 generate_qr_code(wallet["address"], wallet["number"])
