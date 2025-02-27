@@ -50,5 +50,3 @@ if name == "main":
     
     choice = input("Do you want to encrypt the file? (yes/no): ").strip().lower()
     save_to_file(wallets_json, encrypt=(choice == "yes"))
-
-Added wallet generator script
