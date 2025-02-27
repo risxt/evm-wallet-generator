@@ -49,25 +49,34 @@ def save_to_file(data, encrypt=False):
 
     console.print(f"✅ [bold green]Wallets saved to {filename}[/bold green]")
 
+def generate_wallets():
+    """Handles the loop for generating wallets until user exits."""
+    while True:
+        console.print("\n[bold magenta]🚀 Ethereum Wallet Generator[/bold magenta]\n")
+        
+        num_wallets = Prompt.ask("[cyan]How many wallets do you want to generate?[/cyan]", default="1")
+        num_wallets = int(num_wallets)
+
+        wallets = []
+        for _ in track(range(num_wallets), description="🔄 Generating wallets..."):
+            wallets.append(generate_wallet())
+
+        table = Table(title="🔑 Generated Wallets", show_lines=True)
+        table.add_column("Address", style="cyan", justify="left")
+        table.add_column("Private Key", style="red", justify="left")
+
+        for wallet in wallets:
+            table.add_row(wallet["address"], wallet["private_key"])
+
+        console.print(table)
+
+        choice = Prompt.ask("[yellow]Do you want to encrypt the file? (y/n)[/yellow]", choices=["y", "n"])
+        save_to_file(json.dumps(wallets, indent=4), encrypt=(choice == "y"))
+
+        again = Prompt.ask("[blue]Do you want to generate more wallets? (y/n)[/blue]", choices=["y", "n"])
+        if again == "n":
+            console.print("[bold red]👋 Exiting the tool. Stay safe![/bold red]")
+            break
+
 if __name__ == "__main__":
-    console.print("\n[bold magenta]🚀 Ethereum Wallet Generator[/bold magenta]\n")
-
-    num_wallets = Prompt.ask("[cyan]How many wallets do you want to generate?[/cyan]", default="1")
-    num_wallets = int(num_wallets)
-
-    wallets = []
-    
-    for _ in track(range(num_wallets), description="🔄 Generating wallets..."):
-        wallets.append(generate_wallet())
-
-    table = Table(title="🔑 Generated Wallets", show_lines=True)
-    table.add_column("Address", style="cyan", justify="left")
-    table.add_column("Private Key", style="red", justify="left")
-
-    for wallet in wallets:
-        table.add_row(wallet["address"], wallet["private_key"])
-
-    console.print(table)
-
-    choice = Prompt.ask("[yellow]Do you want to encrypt the file? (yes/no)[/yellow]", choices=["yes", "no"])
-    save_to_file(json.dumps(wallets, indent=4), encrypt=(choice == "yes"))
+    generate_wallets()
