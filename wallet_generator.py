@@ -3,15 +3,17 @@ import json
 from time import sleep
 from rich.console import Console
 from rich.progress import track
+import getpass
+from web3 import Web3, Account
 
 console = Console()
 
 def generate_wallet():
-    # Simulasi fungsi generate_wallet() - Gantilah dengan implementasi yang sesuai
-    return "example mnemonic", "0x123456789abcdef", "private_key_example"
+    private_key = "0x" + os.urandom(32).hex()
+    account = Account.from_key(private_key)
+    return "example mnemonic", account.address, private_key
 
 def save_to_file(wallets, file_format, save_mode, encrypt=False, filename=None):
-    """Fungsi untuk menyimpan data wallet ke file dengan berbagai mode penyimpanan."""
     if save_mode == "3" and not filename:
         console.print("[red]Error: Nama file tidak boleh kosong![/red]")
         return
@@ -34,13 +36,21 @@ def save_to_file(wallets, file_format, save_mode, encrypt=False, filename=None):
         file.write(data)
     
     console.print(f"[green]Wallets berhasil disimpan ke {filepath}[/green]")
+    
+    if encrypt and file_format == "1":
+        for wallet in wallets:
+            password = getpass.getpass(f"Buat password untuk keystore JSON wallet {wallet['number']}: ")
+            keystore = Account.encrypt(wallet['private_key'], password)
+            keystore["address"] = wallet['address']
+            keystore_filename = f"wallet_{wallet['number']}.json"
+            with open(keystore_filename, "w") as f:
+                json.dump(keystore, f, indent=4)
+            console.print(f"[green]Keystore JSON disimpan sebagai {keystore_filename}[/green]")
 
 def generate_qr_code(address, number):
-    """Fungsi untuk membuat QR Code - Bisa ditambahkan implementasi sesuai kebutuhan."""
     console.print(f"[blue]QR Code generated for {address} (Wallet {number})[/blue]")
 
 def display_wallets():
-    """Fungsi untuk menampilkan wallet yang tersimpan - Bisa dikembangkan lebih lanjut."""
     console.print("[yellow]Fitur ini belum diimplementasikan.[/yellow]")
 
 def main():
