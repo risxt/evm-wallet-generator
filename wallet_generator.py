@@ -38,8 +38,8 @@ def save_to_file(wallets, file_format, save_mode, encrypt=False, filename=None):
     console.print(f"[green]Wallets berhasil disimpan ke {filepath}[/green]")
     
     if encrypt and file_format == "1":
+        password = getpass.getpass("Buat satu password untuk semua Keystore JSON: ")
         for wallet in wallets:
-            password = getpass.getpass(f"Buat password untuk keystore JSON wallet {wallet['number']}: ")
             keystore = Account.encrypt(wallet['private_key'], password)
             keystore["address"] = wallet['address']
             keystore_filename = f"wallet_{wallet['number']}.json"
@@ -88,16 +88,6 @@ def main():
             
             encrypt_choice = input("Do you want to encrypt the wallets as Keystore JSON (y/n)? ").strip().lower()
             save_to_file(wallets, file_format, save_mode, encrypt=(encrypt_choice == "y"), filename=filename)
-            
-            if encrypt_choice == "y":
-                for wallet in wallets:
-                    password = getpass.getpass(f"Enter password for Keystore JSON wallet {wallet['number']}: ")
-                    keystore = Account.encrypt(wallet['private_key'], password)
-                    keystore["address"] = wallet['address']
-                    keystore_filename = f"wallet_{wallet['number']}.json"
-                    with open(keystore_filename, "w") as f:
-                        json.dump(keystore, f, indent=4)
-                    console.print(f"[green]Keystore JSON saved as {keystore_filename}[/green]")
             
             for wallet in wallets:
                 generate_qr_code(wallet["address"], wallet["number"])
